@@ -4,7 +4,7 @@ import json
 import hvac
 
 
-class vauleclient(object):
+class VaultClient(object):
     """
     This class interacts with Vault API using HVAC library
     """
@@ -42,15 +42,6 @@ class vauleclient(object):
         Authenticates with Vault against the Token provided
         by the user
         Updates self.client with HVAC client object
-
-        v0.0.1:
-            We only support github auth_backend
-
-        Todo:
-            v0.0.2:
-                Add AWS-EC2 backend for having ECS / Beanstalk
-                instances directly communicate with Vault to
-                fetch required variables
         """
         if not self.is_auth():
             self.vault_client = hvac.Client(url=self.vault_addr)
@@ -63,39 +54,41 @@ class vauleclient(object):
         Private method that interacts with Vault
         Reads the path relavent to the service name
         provided for the process
-        Todo:
-            v0.0.2:
-                Make service_name as method argument not class argument
-            v0.0.3:
-                Verify based on lease id when did we last fethced the env
-                for a given service. If over a certain time, notify
-                team to update / rotate credentials
         """
         if self.is_auth() and self.service_name and self.secret_path:
+            env_dict = {}
             try:
-                vault_response = self.vault_client.read(self.secret_path)
+                vault_response = self.vault_client.list(self.secret_path)
             except Exception, e:
-                return e
-            else:
-                return vault_response
+                vault_response = {}
+                print(e)
+
+            if vault_response:
+                for e in vault_response['data']['keys']:
+                    env_dict[e] = self.vault_client.read("%s/%s" % (self.secret_path, e))['data']['value']
+            return env_dict
+        else:
+            print("Invalid auth / service_name / service_path")
+            return False
 
     def _write_vault(self, **kwargs):
         """
         This is very basic implementation of write functionality, we will
         improve this over time
         """
-        if self.is_auth() and self.service_name and self.service_path:
+        if self.is_auth() and self.service_name and self.secret_path:
             if isinstance(kwargs, dict):
                 for k, v in kwargs.iteritems():
                     srvc_path = "%s/%s" % (self.secret_path, k)
                     try:
-                        vault_response = self.vault_client.write(srvc_path, v)
+                        vault_response = self.vault_client.write(srvc_path, value=v)
                     except Exception, e:
+                        vault_response = {}
                         print(e)
                     else:
                         # TODO: return required response by using vault_response
                         print("Successfully set %s in vault at %s" % (k, srvc_path))
-                return True
+                return vault_response
             else:
                 print("Please make sure you provide a dict")
                 return False
@@ -113,14 +106,6 @@ class vauleclient(object):
         """
         Created a valid json from the env data
         we fetch from vault
-
-        In case of ECS, this helps in adding the JSON
-        in the task definition
-
-        In case of EBS, this will be called / passed to
-        ebizzle / ebzl to update / create environment
-        vairbales on the fly during the build pipeline
         """
         env_data = self.get_env()
         return json.dumps(env_data)
-
