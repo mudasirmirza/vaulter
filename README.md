@@ -16,10 +16,10 @@ Currently we have tested with Github Auth.
 - ```vault auth-enable github```
 - ```vault write auth/github/config organization=<github organization name>```
 - ```vault policy-write dev vault_policies/dev-policy.hcl```
-- ```vault policy-write admin vault_policies/admin-policy.hcl```
+- ```vault policy-write admins vault_policies/admin-policy.hcl```
 - ```vault policy-write build vault_policies/build-policy.hcl```
 - ```vault write auth/github/map/teams/<admin-team> vaule=admins```
-- ```vault write auth/github/map/users/<github username> value=admin```
+- ```vault write auth/github/map/users/<github username> value=admins```
 - ```vault write secret/<staging || production || testing || dev>/<AWS service beanstalk || ecs>/<service name>/<env name>/MYSQL_HOST value="localhost:3306"```
 
 
