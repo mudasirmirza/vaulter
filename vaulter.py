@@ -78,6 +78,7 @@ class VaultClient(object):
         """
         if self.is_auth() and self.service_name and self.secret_path:
             if isinstance(kwargs, dict):
+                vault_response = {}
                 for k, v in kwargs.iteritems():
                     srvc_path = "%s/%s" % (self.secret_path, k)
                     try:
@@ -95,6 +96,14 @@ class VaultClient(object):
         else:
             print("Invalid auth / service_name / service_path")
             return False
+
+    def write(self, **kwargs):
+        """
+        Wrapper around _write_vault method
+        :param kwargs:
+        :return:
+        """
+        return self._write_vault(**kwargs)
 
     def get_env(self):
         """
