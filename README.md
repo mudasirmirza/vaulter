@@ -27,13 +27,11 @@ Currently we have tested with Github Auth.
 In [1]: import vaulter
 In [2]: tt = "<GITHUB TOKEN>"
 In [3]: aa = vaulter.VaultClient(token=tt, service_name=<service_name>", secret_path="<secret path to env>")
-In [4]: aa.auth_vault()
-In [5]: ggg = aa.get_env()
-In [6]: ggg
-Out[6]: {u'MYSQL_HOST': u'localhost:3306'}
-
-In [7]: aa.jsonify_env()
-Out[7]: '{"MYSQL_HOST": "localhost:3306"}' 
+In [4]: ggg = aa.get_env()
+In [5]: ggg
+Out[5]: {u'MYSQL_HOST': u'localhost:3306'}
+In [6]: aa.jsonify_env()
+Out[6]: '{"MYSQL_HOST": "localhost:3306"}'
 ```
 
 
@@ -65,6 +63,5 @@ Now we can use the output ENV VARS and import them in VAULT
 import valuter
 tt = "<GITHUB TOKEN>"
 aa = vaulter.VaultClient(token=tt, service_name=<service_name>", secret_path="<secret path to env>")
-aa.auth_vault()
 aa.write(**aa.environment_detail())
 ```

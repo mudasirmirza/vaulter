@@ -26,6 +26,7 @@ class VaultClient(object):
         self.env_var_dict = {}
         self.vault_client = None
         self.secret_path = secret_path
+        self.auth_vault()
 
     def is_auth(self):
         """
